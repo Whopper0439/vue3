@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script type="module">
+      // 标准vue中实现了：
+      import {
+        ref,
+        effect,
+      } from '../../../node_modules/vue/dist/vue.esm-browser.prod.js'
+      // import { ref, effect } from '../dist/reactivity.esm.js'
+      // console.log(ref, effect)
+
+      const count = ref(0)
+
+      effect(() => {
+        console.log('effect1 count.value => ', count.value)
+      })
+
+      // 问题：两份effect,第二次get访问到时覆盖了ref保存的subs,即fn,可以采用set->链表优化
+      effect(() => {
+        console.log('effect2 count.value => ', count.value)
+      })
+
+      setTimeout(() => {
+        count.value = 1
+      }, 1000)
+    </script>
+  </head>
+  <body></body>
+</html>
