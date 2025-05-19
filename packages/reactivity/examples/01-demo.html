@@ -6,23 +6,56 @@
     <title>Document</title>
     <script type="module">
       // 标准vue中实现了：
-      import {
-        ref,
-        effect,
-      } from '../../../node_modules/vue/dist/vue.esm-browser.prod.js'
-      // import { ref, effect } from '../dist/reactivity.esm.js'
+      // import {
+      //   ref,
+      //   effect,
+      // } from '../../../node_modules/vue/dist/vue.esm-browser.prod.js'
+      import { ref, effect } from '../dist/reactivity.esm.js'
       // console.log(ref, effect)
 
       const count = ref(0)
 
-      effect(() => {
-        console.log('effect1 count.value => ', count.value)
-      })
+      // // 问题1：两份effect,第二次get访问到时覆盖了ref保存的subs,即fn,可以采用set->链表优化
+      // effect(() => {
+      //   console.log('effect1 count.value => ', count.value)
+      // })
 
-      // 问题：两份effect,第二次get访问到时覆盖了ref保存的subs,即fn,可以采用set->链表优化
-      effect(() => {
-        console.log('effect2 count.value => ', count.value)
-      })
+      // effect(() => {
+      //   console.log('effect2 count.value => ', count.value)
+      // })
+
+      // 问题2：两份effect嵌套，只响应内部的
+      // 内部effect执行结束，activeSub赋值为undefined,导致外部的link无法收集依赖，无法响应
+      // 解决：每一个effect fn 执行前，保存上一个外部的activeSub，内部effect结束后，赋值为上一个activeSub,不直接赋值为undefined
+      // debugger
+      // const effect1 = effect(() => {
+      //   // activeSub = effect1
+      //   // effect2 fn 执行之前, prevSub = activeSub = effect1
+      //   const effect2 = effect(() => {
+      //     // activeSub = effect2
+      //     console.log('嵌套的 effect count.value => ', count.value)
+      //   })
+      //   // 执行完了，不设置成undefined，activeSub = prevSub = effect1
+
+      //   console.log('外部的 effect count.value => ', count.value)
+      // })
+
+      // 3.scheduler调度器，fn收集依赖，不让fn响应，触发后执行scheduler
+      // 返回值e -> run()函数
+      const runner = effect(
+        () => {
+          console.log('effect count.value => ', count.value)
+          return 1
+        },
+        {
+          scheduler() {
+            // 调度器中也能触发fn,runner方法的返回值就是fn的返回值
+            const newValue = runner()
+            console.log('触发了调度器', newValue)
+          },
+        },
+      )
+      console.dir(runner)
 
       setTimeout(() => {
         count.value = 1

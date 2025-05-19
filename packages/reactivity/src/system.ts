@@ -1,6 +1,8 @@
+import { ReactiveEffect } from './effect'
+
 // 链表节点
 export interface Link {
-  sub: Function // 保存effect传入的fn
+  sub: ReactiveEffect // 保存effect传入的fn, 之后重构为ReactiveEffect对象类型
   nextSub: Link | undefined // 下一个节点
   prevSub: Link | undefined // 上一个节点
 }
@@ -18,7 +20,7 @@ export function propagate(subs) {
     link = link.nextSub
   }
 
-  queuedEffect.forEach(effect => effect())
+  queuedEffect.forEach(effect => effect.notify()) // run / scheduler
 }
 
 /**

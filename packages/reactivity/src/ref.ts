@@ -61,7 +61,7 @@ class RefImpl {
     // 1.只有一个fn时的情况
     // this.subs?.()
     // 2.triggerRef(dep) 抽取，dep->this 当前的ref对象
-    // let link = dep.subs // 记录当前节点
+    // let link = this.subs // 记录当前节点
     // let queuedEffect = []
 
     // while (link) {
