@@ -1,8 +1,17 @@
 // 用来保存当前正在执行的effect
+
+import { Link } from './system'
+
 // 重构ReactiveEffect类，activeSub从函数，修改为对象
 export let activeSub
 
 export class ReactiveEffect {
+  /**
+   * 依赖项链表的头节点，尾节点
+   */
+  deps: Link | undefined
+  depsTail: Link | undefined
+
   constructor(public fn) {}
   run() {
     // 优化：解决effect嵌套的问题 -> 先将当前的effect保存起来
@@ -10,6 +19,9 @@ export class ReactiveEffect {
     // activeSub从函数，修改为对象
     // 每次执行fn之前，把this放到activeSub上面
     activeSub = this
+    
+    this.depsTail = undefined
+
     try {
       return this.fn()
     } finally {
