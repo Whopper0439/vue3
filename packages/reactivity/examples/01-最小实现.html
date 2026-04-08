@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script type="module">
+      // 标准vue中实现了：
+      // import {
+      //   ref,
+      //   effect,
+      // } from '../../../node_modules/vue/dist/vue.esm-browser.prod.js'
+      import { ref, effect } from '../dist/reactivity.esm.js'
+      // console.log(ref, effect)
+
+      const count = ref(0)
+
+      // 响应式最小实现，get(),set()
+      effect(() => {
+        console.log('count.value => ', count.value)
+      })
+
+      setTimeout(() => {
+        count.value = 1
+      }, 1000)
+    </script>
+  </head>
+  <body></body>
+</html>

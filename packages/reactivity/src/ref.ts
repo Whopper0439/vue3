@@ -28,26 +28,6 @@ class RefImpl {
     // 1.只有一个fn时的情况，直接传入函数
     // this.subs = activeSub
     // 2.trackRef(dep)抽取，dep->this 当前的ref对象
-    // const newLink = {
-    //   sub: activeSub,
-    //   nextSub: undefined,
-    //   prevSub: undefined,
-    // }
-    // /**
-    //  * 关联链表关系，即链表插入，传入函数类型的链表节点
-    //  * 1.尾节点有，直接往尾节点后面插入
-    //  * 2.尾节点没有，则表示第一次关联，往头节点后面加，头尾相同
-    //  */
-    // if (this.subsTail) {
-    //   this.subsTail.nextSub = newLink
-    //   newLink.prevSub = this.subsTail
-    //   this.subsTail = newLink
-    // } else {
-    //   this.subs = newLink
-    //   this.subsTail = newLink
-    // }
-    //   trackRef(this)
-    // }
     trackRef(this)
     return this._value
   }
@@ -61,15 +41,6 @@ class RefImpl {
     // 1.只有一个fn时的情况
     // this.subs?.()
     // 2.triggerRef(dep) 抽取，dep->this 当前的ref对象
-    // let link = this.subs // 记录当前节点
-    // let queuedEffect = []
-
-    // while (link) {
-    //   queuedEffect.push(link.sub)
-    //   link = link.nextSub
-    // }
-
-    // queuedEffect.forEach(effect => effect())
     triggerRef(this)
   }
 }
@@ -93,25 +64,7 @@ export function isRef(value) {
  * @param dep ：当前的ref对象,this
  */
 export function trackRef(dep) {
-  // link(dep, sub)抽取，dep, sub -> activeSub
-  // const newLink = {
-  //   sub: activeSub,
-  //   nextSub: undefined,
-  //   prevSub: undefined,
-  // }
-  // /**
-  //  * 关联链表关系，即链表插入，传入函数类型的链表节点
-  //  * 1.尾节点有，直接往尾节点后面插入
-  //  * 2.尾节点没有，则表示第一次关联，往头节点后面加，头尾相同
-  //  */
-  // if (dep.subsTail) {
-  //   dep.subsTail.nextSub = newLink
-  //   newLink.prevSub = dep.subsTail
-  //   dep.subsTail = newLink
-  // } else {
-  //   dep.subs = newLink
-  //   dep.subsTail = newLink
-  // }
+  // link(dep, sub)抽取，dep -> ref对象, sub -> activeSub
   if (activeSub) {
     link(dep, activeSub)
   }
@@ -124,13 +77,6 @@ export function trackRef(dep) {
  */
 export function triggerRef(dep) {
   // propagate(subs)抽取，subs -> dep.subs
-  // let link = dep.subs // 记录当前节点
-  // let queuedEffect = []
-  // while (link) {
-  //   queuedEffect.push(link.sub)
-  //   link = link.nextSub
-  // }
-  // queuedEffect.forEach(effect => effect())
   if (dep.subs) {
     propagate(dep.subs)
   }

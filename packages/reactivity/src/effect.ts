@@ -16,10 +16,12 @@ export class ReactiveEffect {
   run() {
     // 优化：解决effect嵌套的问题 -> 先将当前的effect保存起来
     const prevSub = activeSub
+
     // activeSub从函数，修改为对象
     // 每次执行fn之前，把this放到activeSub上面
     activeSub = this
-    
+
+    // deps链 -> 头节点有，尾节点undefined,说明之前 effect 被收集过依赖，尝试复用link
     this.depsTail = undefined
 
     try {
@@ -53,6 +55,7 @@ export class ReactiveEffect {
  * @param fn
  */
 export function effect(fn, options) {
+  // 重构ReactiveEffect之前
   // activeSub = fn
   // activeSub()
   // activeSub = undefined

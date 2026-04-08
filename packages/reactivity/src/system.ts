@@ -45,16 +45,16 @@ export function propagate(subs) {
  * @param sub :activeSub
  */
 export function link(dep, sub) {
-  // region 尝试复用链表节点
-  const currentDep = sub.depsTail
+  // region 添加新节点前，deps链 -> 尝试复用链表节点link
+  const currentDep = sub.depsTail // 拿到尾节点
   /**
    * 两种情况：
    * 1.如果头节点有，尾节点没有，尝试复用头节点
    * 2.如果尾节点还有nextDep,尝试复用尾节点的nextDep
    */
-  const nextDep = currentDep === undefined ? sub.deps : currentDep.nextDep
+  const nextDep = currentDep === undefined ? sub.deps : currentDep.nextDep //nextDep为下一个可能复用的节点
   if (nextDep && nextDep.dep === dep) {
-    console.log('复用节点：', nextDep)
+    // console.log('复用节点：', nextDep)
     sub.depsTail = nextDep // 相同的依赖项复用
     return
   }
@@ -68,7 +68,7 @@ export function link(dep, sub) {
     nextDep: undefined,
   }
 
-  // region 将链表节点和dep建立关联关系
+  // region 将链表节点和dep建立关联关系,双向链表插入
   /**
    * 关联链表关系，即链表插入，传入函数类型的链表节点
    * 1.尾节点有，直接往尾节点后面插入
@@ -84,7 +84,7 @@ export function link(dep, sub) {
   }
   // endregion
 
-  // region 将链表节点和sub建立关联关系
+  // region 将链表节点和sub建立关联关系,单向链表插入
   if (sub.depsTail) {
     sub.depsTail.nextDep = newLink
     sub.depsTail = newLink
