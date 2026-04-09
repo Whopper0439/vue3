@@ -39,6 +39,8 @@ export function propagate(subs) {
   queuedEffect.forEach(effect => effect.notify()) // run / scheduler
 }
 
+//保存已经清理的节点，留着复用
+let linkPool: Link
 /**
  * 链接链表关系
  * @param dep :依赖项，当前ref对象,this
@@ -60,12 +62,29 @@ export function link(dep, sub) {
   }
   // endregion
 
-  const newLink = {
-    sub,
-    dep,
-    nextSub: undefined,
-    prevSub: undefined,
-    nextDep,
+  /**
+   * 看一下linkPool中有没有link节点，有就复用，没有再创建新的节点
+   */
+  let newLink
+
+  if (linkPool) {
+    //console.log('复用了linkPool')
+
+    newLink = linkPool
+    linkPool = linkPool.nextDep
+
+    //newLink赋值
+    newLink.sub = sub
+    newLink.dep = dep
+    newLink.nextDep = nextDep
+  } else {
+    newLink = {
+      sub,
+      dep,
+      nextSub: undefined,
+      prevSub: undefined,
+      nextDep,
+    }
   }
 
   // region 将链表节点和dep建立关联关系,双向链表插入
@@ -159,7 +178,12 @@ export function clearTracking(link: Link) {
 
     // deps链
     link.dep = undefined
-    link.nextDep = undefined
+
+    // link.nextDep = undefined
+    // 清理掉的链表节点给linkPool复用,头插法
+    link.nextDep = linkPool
+    linkPool = link
+    //console.log('保存到linkPool')
 
     // while下一个节点清理
     link = nextDep
