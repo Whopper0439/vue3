@@ -1,0 +1,123 @@
+import { isObject } from '@vue/shared'
+import { Link, link, propagate } from './system'
+import { activeSub } from './effect'
+
+export function reactive(target) {
+  return createReactiveObject(target)
+}
+
+function createReactiveObject(target) {
+  /**
+   * reactive必须接受一个对象
+   */
+
+  // target不是一个对象，直接不处理，返回
+  if (!isObject(target)) {
+    return target
+  }
+
+  // target是一个对象，创建target的代理对象
+  const proxy = new Proxy(target, {
+    get(target, key, receiver) {
+      /**
+       * 收集依赖，绑定target中某一个key和sub之间的关系
+       */
+      //TODO,receiver先留着
+      //console.log('get  target key:', target, key)
+      track(target, key)
+
+      return Reflect.get(target, key) //返回target[key]
+    },
+    set(target, key, newValue, receiver) {
+      /**
+       * 触发更新，set时通知之前收集的依赖，重新执行
+       */
+      //console.log('set  target key newValue:', target, key, newValue)
+
+      // 先更新set，再通知重新执行
+      const res = Reflect.set(target, key, newValue)
+      trigger(target, key)
+      return res //返回target[key]=newValue
+    },
+  })
+
+  return proxy
+}
+
+/**
+ * 绑定target[key]关联的所有Dep
+ * obj = { a:0, b:1 }
+ * targetMap = {
+ *   obj: {
+ *     a: Dep,
+ *     b: Dep
+ *   }
+ * }
+ * @param target
+ * @param key
+ */
+const targetMap = new WeakMap()
+
+function track(target, key) {
+  if (!activeSub) {
+    return
+  }
+
+  /**
+   * 找depsMap = {
+   *     a: Dep,
+   *     b: Dep
+   *   }
+   */
+  let depsMap = targetMap.get(target)
+
+  if (!depsMap) {
+    /**
+     * 没有depsMap => 之前没有收集过这个对象的任何key
+     * 那就创建一个新的放进target
+     * target -> depsMap
+     */
+    depsMap = new Map()
+    targetMap.set(target, depsMap)
+  }
+
+  /**
+   * 找dep => Dep
+   */
+  let dep = depsMap.get(key)
+  if (!dep) {
+    dep = new Dep()
+    depsMap.set(key, dep)
+  }
+
+  link(dep, activeSub)
+
+  // console.log('dep:', dep)
+}
+
+function trigger(target, key) {
+  const depsMap = targetMap.get(target)
+  if (!depsMap) {
+    /**
+     * depsMap没有，表示这个对象从没有任何属性在sub中访问过，即没和effect建立过依赖
+     */
+    return
+  }
+
+  const dep = depsMap.get(key)
+  if (!dep) {
+    /**
+     * dep没有，表示这个key从没有在sub中访问过，即没和effect建立过依赖
+     */
+    return
+  }
+
+  //找到dep的subs，通知他们重新执行
+  propagate(dep.subs)
+}
+
+class Dep {
+  subs: Link
+  subsTail: Link
+  constructor() {}
+}
