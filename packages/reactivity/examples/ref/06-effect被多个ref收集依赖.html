@@ -15,19 +15,20 @@
       // import {
       //   ref,
       //   effect,
-      // } from '../../../node_modules/vue/dist/vue.esm-browser.prod.js'
-      import { ref, effect } from '../dist/reactivity.esm.js'
+      // } from '../../../../node_modules/vue/dist/vue.esm-browser.prod.js'
+      import { ref, effect } from '../../dist/reactivity.esm.js'
 
       const flag = ref(true)
+      const count = ref(0)
       const e = effect(() => {
         flag.value
+        count.value
         console.count('effect') //计数器
       })
 
       console.dir(e)
       btn.onclick = () => {
-        flag.value = !flag.value
-        console.log(flag)
+        count.value++
       }
     </script>
   </body>

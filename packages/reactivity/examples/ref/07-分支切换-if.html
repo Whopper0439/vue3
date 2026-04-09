@@ -18,21 +18,15 @@
       // import {
       //   ref,
       //   effect,
-      // } from '../../../node_modules/vue/dist/vue.esm-browser.prod.js'
-      import { ref, effect } from '../dist/reactivity.esm.js'
+      // } from '../../../../node_modules/vue/dist/vue.esm-browser.prod.js'
+      import { ref, effect } from '../../dist/reactivity.esm.js'
 
       const flag = ref(true)
       const name = ref('cjw')
       const age = ref(18)
 
-      let count = 0
-
       const e = effect(() => {
         console.count('effect')
-
-        if (count > 0) return
-
-        count++
 
         if (flag.value) {
           app.innerHTML = name.value
