@@ -65,7 +65,7 @@ export function link(dep, sub) {
     dep,
     nextSub: undefined,
     prevSub: undefined,
-    nextDep: undefined,
+    nextDep,
   }
 
   // region 将链表节点和dep建立关联关系,双向链表插入
@@ -93,4 +93,75 @@ export function link(dep, sub) {
     sub.depsTail = newLink
   }
   // endregion
+}
+
+/**
+ * 开始追踪依赖，将尾节点设置为undefined
+ * @param sub
+ */
+export function startTrack(sub) {
+  sub.depsTail = undefined
+}
+
+/**
+ * 结束追踪，找到需要清理的依赖，断开关联关系
+ * @param sub
+ */
+
+export function endTrack(sub) {
+  const depsTail = sub.depsTail
+  /**
+   * 情况一：depsTail有，且depsTail还有nextDep,从depsTail.nextDep开始清除依赖
+   * 情况二：depsTail没有，且头节点有，那就从头节点sub.deps开始把所有的依赖都清除
+   */
+  if (depsTail) {
+    if (depsTail.nextDep) {
+      // console.log('把它移除：', depsTail.nextDep)
+      clearTracking(depsTail.nextDep)
+      depsTail.nextDep = undefined
+    }
+  } else if (sub.deps) {
+    // console.log('从头开始删除依赖：', sub.deps)
+    clearTracking(sub.deps)
+    sub.deps = undefined
+  }
+}
+
+/**
+ * 清理依赖关系
+ * @param link
+ */
+
+export function clearTracking(link: Link) {
+  while (link) {
+    const { prevSub, nextSub, dep, nextDep } = link
+
+    /**
+     * 删除节点操作，注意两条链，deps/subs
+     */
+
+    // subs链
+    if (prevSub) {
+      prevSub.nextSub = nextSub
+      link.nextSub = undefined
+    } else {
+      dep.subs = nextSub
+    }
+
+    if (nextSub) {
+      nextSub.prevSub = prevSub
+      link.prevSub = undefined
+    } else {
+      dep.subsTail = prevSub
+    }
+
+    link.sub = undefined
+
+    // deps链
+    link.dep = undefined
+    link.nextDep = undefined
+
+    // while下一个节点清理
+    link = nextDep
+  }
 }

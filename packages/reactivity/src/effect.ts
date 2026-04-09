@@ -1,6 +1,6 @@
 // 用来保存当前正在执行的effect
 
-import { Link } from './system'
+import { Link, startTrack, endTrack } from './system'
 
 // 重构ReactiveEffect类，activeSub从函数，修改为对象
 export let activeSub
@@ -22,11 +22,14 @@ export class ReactiveEffect {
     activeSub = this
 
     // deps链 -> 头节点有，尾节点undefined,说明之前 effect 被收集过依赖，尝试复用link
-    this.depsTail = undefined
+    startTrack(this)
 
     try {
       return this.fn()
     } finally {
+      // 分支切换时，清理依赖
+      endTrack(this)
+
       // fn执行完成后，把activeSub设置成undefined
       // activeSub = undefined
       activeSub = prevSub // 执行完成后，恢复之前的 effect
