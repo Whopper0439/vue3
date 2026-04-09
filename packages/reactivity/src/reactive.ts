@@ -26,7 +26,10 @@ function createReactiveObject(target) {
       //console.log('get  target key:', target, key)
       track(target, key)
 
-      return Reflect.get(target, key) //返回target[key]
+      // console.log(receiver === proxy)
+
+      // receiver即传给count的this,使访问器中的this指向proxy代理对象
+      return Reflect.get(target, key, receiver) //返回target[key]
     },
     set(target, key, newValue, receiver) {
       /**
@@ -35,7 +38,7 @@ function createReactiveObject(target) {
       //console.log('set  target key newValue:', target, key, newValue)
 
       // 先更新set，再通知重新执行
-      const res = Reflect.set(target, key, newValue)
+      const res = Reflect.set(target, key, newValue, receiver)
       trigger(target, key)
       return res //返回target[key]=newValue
     },
@@ -62,6 +65,7 @@ function track(target, key) {
   if (!activeSub) {
     return
   }
+  // console.log(target, key)
 
   /**
    * 找depsMap = {
