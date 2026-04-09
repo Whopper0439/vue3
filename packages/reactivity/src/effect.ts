@@ -12,6 +12,8 @@ export class ReactiveEffect {
   deps: Link | undefined
   depsTail: Link | undefined
 
+  tracking = false
+
   constructor(public fn) {}
   run() {
     // 优化：解决effect嵌套的问题 -> 先将当前的effect保存起来

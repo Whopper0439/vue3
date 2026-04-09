@@ -32,7 +32,12 @@ export function propagate(subs) {
   let queuedEffect = []
 
   while (link) {
-    queuedEffect.push(link.sub)
+    //触发effect更新时,先判断是否在依赖收集状态，避免无限循环递归
+    const sub = link.sub
+    if (!sub.tracking) {
+      queuedEffect.push(sub)
+    }
+
     link = link.nextSub
   }
 
@@ -119,6 +124,7 @@ export function link(dep, sub) {
  * @param sub
  */
 export function startTrack(sub) {
+  sub.tracking = true
   sub.depsTail = undefined
 }
 
@@ -128,6 +134,7 @@ export function startTrack(sub) {
  */
 
 export function endTrack(sub) {
+  sub.tracking = false
   const depsTail = sub.depsTail
   /**
    * 情况一：depsTail有，且depsTail还有nextDep,从depsTail.nextDep开始清除依赖
