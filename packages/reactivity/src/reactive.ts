@@ -5,6 +5,11 @@ import { activeSub } from './effect'
 export function reactive(target) {
   return createReactiveObject(target)
 }
+/**
+ * 保存 target 和 proxy响应式对象 之间的关联关系
+ * target -> proxy
+ */
+const reactiveMap = new WeakMap()
 
 function createReactiveObject(target) {
   /**
@@ -14,6 +19,14 @@ function createReactiveObject(target) {
   // target不是一个对象，直接不处理，返回
   if (!isObject(target)) {
     return target
+  }
+
+  /**
+   * 获取到之前被代理过的响应式对象，直接返回，不需要重新代理
+   */
+  const existingProxy = reactiveMap.get(target)
+  if (existingProxy) {
+    return existingProxy
   }
 
   // target是一个对象，创建target的代理对象
@@ -44,6 +57,8 @@ function createReactiveObject(target) {
     },
   })
 
+  //保存 target 和 proxy响应式对象 之间的关联关系
+  reactiveMap.set(target, proxy)
   return proxy
 }
 
