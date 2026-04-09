@@ -5,6 +5,34 @@ import { activeSub } from './effect'
 export function reactive(target) {
   return createReactiveObject(target)
 }
+
+const mutableHandlers = {
+  get(target, key, receiver) {
+    /**
+     * 收集依赖，绑定target中某一个key和sub之间的关系
+     */
+    //TODO,receiver先留着
+    //console.log('get  target key:', target, key)
+    track(target, key)
+
+    // console.log(receiver === proxy)
+
+    // receiver即传给count的this,使访问器中的this指向proxy代理对象
+    return Reflect.get(target, key, receiver) //返回target[key]
+  },
+  set(target, key, newValue, receiver) {
+    /**
+     * 触发更新，set时通知之前收集的依赖，重新执行
+     */
+    //console.log('set  target key newValue:', target, key, newValue)
+
+    // 先更新set，再通知重新执行
+    const res = Reflect.set(target, key, newValue, receiver)
+    trigger(target, key)
+    return res //返回target[key]=newValue
+  },
+}
+
 /**
  * 保存 target 和 proxy响应式对象 之间的关联关系
  * target -> proxy
@@ -43,32 +71,7 @@ function createReactiveObject(target) {
   }
 
   // target是一个对象，创建target的代理对象
-  const proxy = new Proxy(target, {
-    get(target, key, receiver) {
-      /**
-       * 收集依赖，绑定target中某一个key和sub之间的关系
-       */
-      //TODO,receiver先留着
-      //console.log('get  target key:', target, key)
-      track(target, key)
-
-      // console.log(receiver === proxy)
-
-      // receiver即传给count的this,使访问器中的this指向proxy代理对象
-      return Reflect.get(target, key, receiver) //返回target[key]
-    },
-    set(target, key, newValue, receiver) {
-      /**
-       * 触发更新，set时通知之前收集的依赖，重新执行
-       */
-      //console.log('set  target key newValue:', target, key, newValue)
-
-      // 先更新set，再通知重新执行
-      const res = Reflect.set(target, key, newValue, receiver)
-      trigger(target, key)
-      return res //返回target[key]=newValue
-    },
-  })
+  const proxy = new Proxy(target, mutableHandlers)
 
   //保存 target 和 proxy响应式对象 之间的关联关系
   reactiveMap.set(target, proxy)
