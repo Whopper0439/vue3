@@ -1,4 +1,4 @@
-import { isObject } from '@vue/shared'
+import { isObject, hasChange } from '@vue/shared'
 import { Link, link, propagate } from './system'
 import { activeSub } from './effect'
 
@@ -21,14 +21,21 @@ const mutableHandlers = {
     return Reflect.get(target, key, receiver) //返回target[key]
   },
   set(target, key, newValue, receiver) {
+    const oldValue = target[key]
+
     /**
      * 触发更新，set时通知之前收集的依赖，重新执行
      */
-    //console.log('set  target key newValue:', target, key, newValue)
+    // console.log('set  target key newValue:', target, key, newValue)
 
     // 先更新set，再通知重新执行
     const res = Reflect.set(target, key, newValue, receiver)
-    trigger(target, key)
+
+    //如果set新值和老值不一样，触发更新
+    if (hasChange(newValue, oldValue)) {
+      trigger(target, key)
+    }
+
     return res //返回target[key]=newValue
   },
 }

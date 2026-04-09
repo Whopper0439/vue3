@@ -1,4 +1,4 @@
-import { isObject } from '@vue/shared'
+import { isObject, hasChange } from '@vue/shared'
 import { activeSub, effect } from './effect'
 import { Link, link, propagate } from './system'
 import { reactive } from './reactive'
@@ -36,6 +36,7 @@ class RefImpl {
   }
 
   set value(newValue) {
+    const oldValue = this._value
     // 触发更新
     // console.log('我的值变了')
     this._value = isObject(newValue) ? reactive(newValue) : newValue
@@ -44,7 +45,10 @@ class RefImpl {
     // 1.只有一个fn时的情况
     // this.subs?.()
     // 2.triggerRef(dep) 抽取，dep->this 当前的ref对象
-    triggerRef(this)
+    if (hasChange(newValue, oldValue)) {
+      // set 新值和老值不一样，才触发更新
+      triggerRef(this)
+    }
   }
 }
 
