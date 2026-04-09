@@ -1,5 +1,7 @@
+import { isObject } from '@vue/shared'
 import { activeSub, effect } from './effect'
 import { Link, link, propagate } from './system'
+import { reactive } from './reactive'
 
 // ref 标记 ， 证明是一个ref
 enum ReactiveFlags {
@@ -17,7 +19,8 @@ class RefImpl {
   [ReactiveFlags.IS_REF] = true // ref 标记 ， 证明是一个ref
 
   constructor(value) {
-    this._value = value
+    //如果value是对象，reactive包裹成响应式
+    this._value = isObject(value) ? reactive(value) : value
   }
 
   get value() {
@@ -35,7 +38,7 @@ class RefImpl {
   set value(newValue) {
     // 触发更新
     // console.log('我的值变了')
-    this._value = newValue
+    this._value = isObject(newValue) ? reactive(newValue) : newValue
 
     // 通知effect重新执行，获取到最新值
     // 1.只有一个fn时的情况
