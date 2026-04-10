@@ -1,6 +1,6 @@
 // 用来保存当前正在执行的effect
 
-import { Link, startTrack, endTrack } from './system'
+import { Link, startTrack, endTrack, Sub } from './system'
 
 // 重构ReactiveEffect类，activeSub从函数，修改为对象
 export let activeSub
@@ -9,7 +9,7 @@ export function setActiveSub(sub) {
   activeSub = sub
 }
 
-export class ReactiveEffect {
+export class ReactiveEffect implements Sub {
   /**
    * 依赖项链表的头节点，尾节点
    */
@@ -17,6 +17,7 @@ export class ReactiveEffect {
   depsTail: Link | undefined
 
   tracking = false
+  dirty = false
 
   constructor(public fn) {}
   run() {

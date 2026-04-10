@@ -1,6 +1,6 @@
 import { isObject, hasChange } from '@vue/shared'
 import { activeSub, effect } from './effect'
-import { Link, link, propagate } from './system'
+import { Dependency, Link, link, propagate } from './system'
 import { reactive } from './reactive'
 
 // ref 标记 ， 证明是一个ref
@@ -11,7 +11,7 @@ export enum ReactiveFlags {
 /**
  * Ref的类
  */
-class RefImpl {
+class RefImpl implements Dependency {
   _value // 保存实际的值
   // 保存和effect之间的关联关系
   subs: Link // 订阅者链表的头节点,即head

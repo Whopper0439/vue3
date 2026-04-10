@@ -49,10 +49,10 @@ export function propagate(subs) {
   while (link) {
     //触发effect更新时,先判断是否在依赖收集状态，避免无限循环递归
     const sub = link.sub
-    if (!sub.tracking) {
+    if (!sub.tracking && !sub.dirty) {
+      sub.dirty = true // 同一个dep只有第一次能进来
+
       if ('update' in sub) {
-        // computed标记为脏
-        sub.dirty = true
         processComputedUpdate(sub)
       } else {
         queuedEffect.push(sub)
@@ -87,6 +87,13 @@ export function link(dep, sub) {
     return
   }
   // endregion
+
+  /**
+   * 补充：
+   * effect中重复 get 同一个 dep 时的处理：
+   * 遍历，如果dep和sub建立过关联关系，直接返回 -> 时间换空间
+   * effect dirty标记 -> 空间换时间
+   */
 
   /**
    * 看一下linkPool中有没有link节点，有就复用，没有再创建新的节点
@@ -157,6 +164,7 @@ export function startTrack(sub) {
 export function endTrack(sub) {
   sub.tracking = false
   const depsTail = sub.depsTail
+  sub.dirty = false
   /**
    * 情况一：depsTail有，且depsTail还有nextDep,从depsTail.nextDep开始清除依赖
    * 情况二：depsTail没有，且头节点有，那就从头节点sub.deps开始把所有的依赖都清除

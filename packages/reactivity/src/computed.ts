@@ -69,7 +69,6 @@ class ComputedRefImpl implements Dependency, Sub {
       const oldValue = this._value
       // 拿到新值
       this._value = this.fn()
-      this.dirty = false // 拿到最新值，标记为不脏
 
       //如果值发生了变化，返回true
       return hasChange(oldValue, this._value)
