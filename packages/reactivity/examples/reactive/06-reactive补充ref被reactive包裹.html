@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Title</title>
+    <style></style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module">
+      // import {
+      //   reactive,
+      //   effect,
+      //   ref
+      // } from '../../../../node_modules/vue/dist/vue.esm-browser.prod.js'
+      import { reactive, effect, ref } from '../../dist/reactivity.esm.js'
+
+      const a = ref(0)
+
+      /**
+       * 如果target.a是一个ref，直接把值给他，不需要 .value
+       * 如果更新了state.a，他之前是一个ref,那么会修改原始的ref.value的值为newValue
+       * 如果newValue是一个ref,那就不需要同步
+       */
+      const state = reactive({
+        a,
+      })
+
+      effect(() => {
+        //不用state.a.value
+        console.log(state.a)
+      })
+
+      setTimeout(() => {
+        // state.a = 1
+        // a.value = 1
+        // state.a = ref(1)
+        console.log(a)
+      }, 1000)
+    </script>
+  </body>
+</html>
