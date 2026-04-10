@@ -31,8 +31,10 @@ function processComputedUpdate(sub) {
    * 1.调用update
    * 2.通知subs链表上所有的sub重新执行
    */
-  sub.update()
-  propagate(sub.subs)
+  if (sub.subs) {
+    sub.update()
+    propagate(sub.subs)
+  }
 }
 
 /**
@@ -48,6 +50,8 @@ export function propagate(subs) {
     const sub = link.sub
     if (!sub.tracking) {
       if ('update' in sub) {
+        // computed标记为脏
+        sub.dirty = true
         processComputedUpdate(sub)
       } else {
         queuedEffect.push(sub)

@@ -19,13 +19,20 @@ class ComputedRefImpl implements Dependency, Sub {
   depsTail: Link | undefined
   tracking: boolean
 
+  //计算属性为脏时，get value时，需要执行update
+  dirty = true
+
   constructor(
     public fn, // getter
     private setter,
   ) {}
 
   get value() {
-    this.update()
+    // computed为脏时，执行update
+    if (this.dirty) {
+      this.update()
+      this.dirty = false // 拿到最新值，标记为不脏
+    }
     /**
      * 作为dep,要和sub做关联关系
      */
