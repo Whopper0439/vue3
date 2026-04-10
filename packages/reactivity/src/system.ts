@@ -31,8 +31,9 @@ function processComputedUpdate(sub) {
    * 1.调用update
    * 2.通知subs链表上所有的sub重新执行
    */
-  if (sub.subs) {
-    sub.update()
+  if (sub.subs && sub.update()) {
+    // sub.update返回true,表示值发生了变化，此时才更新
+    // sub.update() 放到了if中
     propagate(sub.subs)
   }
 }

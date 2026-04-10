@@ -1,4 +1,4 @@
-import { isFunction } from '@vue/shared'
+import { hasChange, isFunction } from '@vue/shared'
 import { ReactiveFlags } from './ref'
 import { Dependency, endTrack, link, Link, startTrack, Sub } from './system'
 import { activeSub, setActiveSub } from './effect'
@@ -31,7 +31,6 @@ class ComputedRefImpl implements Dependency, Sub {
     // computed为脏时，执行update
     if (this.dirty) {
       this.update()
-      this.dirty = false // 拿到最新值，标记为不脏
     }
     /**
      * 作为dep,要和sub做关联关系
@@ -66,7 +65,14 @@ class ComputedRefImpl implements Dependency, Sub {
     startTrack(this)
 
     try {
+      // 拿到老值
+      const oldValue = this._value
+      // 拿到新值
       this._value = this.fn()
+      this.dirty = false // 拿到最新值，标记为不脏
+
+      //如果值发生了变化，返回true
+      return hasChange(oldValue, this._value)
     } finally {
       // 分支切换时，清理依赖
       endTrack(this)
