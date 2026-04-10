@@ -4,7 +4,7 @@ import { Link, link, propagate } from './system'
 import { reactive } from './reactive'
 
 // ref 标记 ， 证明是一个ref
-enum ReactiveFlags {
+export enum ReactiveFlags {
   IS_REF = '__v_isRef',
 }
 

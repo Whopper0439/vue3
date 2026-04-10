@@ -1,17 +1,19 @@
 import { ReactiveEffect } from './effect'
 
-interface Dependency {
+export interface Dependency {
   // 订阅者链表的头节点
   subs: Link | undefined
   // 订阅者链表的尾节点
   subsTail: Link | undefined
 }
 
-interface Sub {
+export interface Sub {
   // 订阅者链表的头节点
   deps: Link | undefined
   // 订阅者链表的尾节点
   depsTail: Link | undefined
+
+  tracking: boolean
 }
 
 // 链表节点
@@ -21,6 +23,16 @@ export interface Link {
   prevSub: Link | undefined // 上一个订阅者节点
   dep: Dependency // 依赖项
   nextDep: Link | undefined // 下一个依赖项节点
+}
+
+function processComputedUpdate(sub) {
+  /**
+   * 更新计算属性
+   * 1.调用update
+   * 2.通知subs链表上所有的sub重新执行
+   */
+  sub.update()
+  propagate(sub.subs)
 }
 
 /**
@@ -35,7 +47,11 @@ export function propagate(subs) {
     //触发effect更新时,先判断是否在依赖收集状态，避免无限循环递归
     const sub = link.sub
     if (!sub.tracking) {
-      queuedEffect.push(sub)
+      if ('update' in sub) {
+        processComputedUpdate(sub)
+      } else {
+        queuedEffect.push(sub)
+      }
     }
 
     link = link.nextSub

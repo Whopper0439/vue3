@@ -5,6 +5,10 @@ import { Link, startTrack, endTrack } from './system'
 // 重构ReactiveEffect类，activeSub从函数，修改为对象
 export let activeSub
 
+export function setActiveSub(sub) {
+  activeSub = sub
+}
+
 export class ReactiveEffect {
   /**
    * 依赖项链表的头节点，尾节点
@@ -21,7 +25,8 @@ export class ReactiveEffect {
 
     // activeSub从函数，修改为对象
     // 每次执行fn之前，把this放到activeSub上面
-    activeSub = this
+    //activeSub = this
+    setActiveSub(this)
 
     // deps链 -> 头节点有，尾节点undefined,说明之前 effect 被收集过依赖，尝试复用link
     startTrack(this)
@@ -34,7 +39,8 @@ export class ReactiveEffect {
 
       // fn执行完成后，把activeSub设置成undefined
       // activeSub = undefined
-      activeSub = prevSub // 执行完成后，恢复之前的 effect
+      // activeSub = prevSub // 执行完成后，恢复之前的 effect
+      setActiveSub(prevSub)
     }
   }
 

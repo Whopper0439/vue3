@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Title</title>
+    <style></style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module">
+      // import {
+      //   computed,
+      //   effect,
+      //   ref,
+      // } from '../../../../node_modules/vue/dist/vue.esm-browser.prod.js'
+      import { ref, computed, effect } from '../../dist/reactivity.esm.js'
+
+      const count = ref(0)
+      /**
+       * computed既是一个dep,又是一个sub
+       */
+      const c = computed(() => {
+        console.count('computed')
+        return count.value + 1
+      })
+
+      effect(() => {
+        console.log(c.value)
+      })
+
+      setTimeout(() => {
+        count.value = 1
+        console.log('c.value =>', c.value)
+        console.log('c.value =>', c.value)
+        console.log('c.value =>', c.value)
+        console.log('c.value =>', c.value)
+        console.log('c.value =>', c.value)
+        console.log('c.value =>', c.value)
+      }, 1000)
+    </script>
+  </body>
+</html>
