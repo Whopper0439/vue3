@@ -1,6 +1,7 @@
 import { track, trigger } from './dep'
 import { isRef } from './ref'
-import { hasChange } from '@vue/shared'
+import { hasChange, isObject } from '@vue/shared'
+import { reactive } from './reactive'
 
 export const mutableHandlers = {
   get(target, key, receiver) {
@@ -22,6 +23,11 @@ export const mutableHandlers = {
     // console.log(receiver === proxy)
 
     // receiver即传给count的this,使访问器中的this指向proxy代理对象
+
+    // 如果res是一个对象，将其转换为响应式对象,解决target是多重对象，深层修改响应式问题
+    if (isObject(res)) {
+      return reactive(res)
+    }
     return res //返回target[key]
   },
   set(target, key, newValue, receiver) {
