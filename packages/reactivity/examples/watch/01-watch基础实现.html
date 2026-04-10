@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Title</title>
+    <style></style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module">
+      // import {
+      //   ref,
+      //   watch,
+      // } from '../../../../node_modules/vue/dist/vue.esm-browser.prod.js'
+      import { ref, watch } from '../../dist/reactivity.esm.js'
+
+      const count = ref(0)
+
+      const stop = watch(count, (newValue, oldValue) => {
+        console.log('newValue,oldValue =>', newValue, oldValue)
+      })
+
+      setTimeout(() => {
+        count.value = 1
+        setTimeout(() => {
+          stop()
+          count.value = 2
+        }, 1000)
+      }, 1000)
+    </script>
+  </body>
+</html>
