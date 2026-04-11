@@ -1,9 +1,10 @@
 import { isRef } from './ref'
 import { ReactiveEffect } from './effect'
-import { isObject } from '@vue/shared'
+import { isFunction, isObject } from '@vue/shared'
+import { isReactive } from './reactive'
 
 export function watch(source, cb, options) {
-  const { immediate, once, deep } = options || {}
+  let { immediate, once, deep } = options || {}
 
   if (once) {
     // 如果once传了，那就保存一份，新的cb等于原来的，加上stop
@@ -17,7 +18,17 @@ export function watch(source, cb, options) {
   let getter
 
   if (isRef(source)) {
+    // 如果是ref,访问.value收集依赖
     getter = () => source.value
+  } else if (isReactive(source)) {
+    // reactive解构，且reactive默认deep为true
+    getter = () => source
+    if (!deep) {
+      deep = true
+    }
+  } else if (isFunction(source)) {
+    // 如果是函数，直接作为getter
+    getter = source
   }
 
   if (deep) {
@@ -44,6 +55,7 @@ export function watch(source, cb, options) {
   effect.scheduler = job
 
   if (immediate) {
+    // 如果传了immediate，先cb一次
     job()
   } else {
     // 拿到oldValue，并收集依赖
@@ -58,6 +70,13 @@ export function watch(source, cb, options) {
   return stop
 }
 
+/**
+ * 递归触发getter
+ * @param value
+ * @param depth
+ * @param seen
+ * @returns
+ */
 function traverse(value, depth = Infinity, seen = new Set()) {
   // 如果不是对象或者深度已经到达，直接返回
   if (!isObject(value) || depth <= 0) {

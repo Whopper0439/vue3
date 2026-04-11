@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Title</title>
+    <style></style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module">
+      // import {
+      //   ref,
+      //   reactive,
+      //   watch,
+      // } from '../../../../node_modules/vue/dist/vue.esm-browser.prod.js'
+      import { ref, reactive, watch } from '../../dist/reactivity.esm.js'
+
+      const state = reactive({
+        a: {
+          b: 1,
+          c: {
+            d: 1,
+          },
+        },
+      })
+
+      // ref: () => state.value
+      // reactive: () => state
+      watch(
+        () => state,
+        (newValue, oldValue) => {
+          console.log('newValue,oldValue =>', newValue, oldValue)
+        },
+        {
+          deep: 3,
+          // once: true,
+          // immediate: true
+        },
+      )
+
+      setTimeout(() => {
+        // state.a.b = 2
+        state.a.c.d = 2 // reactive
+        // state.value.a.c.d = 2  // ref
+      }, 1000)
+
+      // setTimeout(() => {
+      //   count.value = 1
+      //   setTimeout(() => {
+      //     count.value = 2
+      //   }, 1000)
+      // }, 1000)
+    </script>
+  </body>
+</html>
