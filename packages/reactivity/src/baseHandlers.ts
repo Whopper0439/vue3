@@ -28,18 +28,20 @@ export const mutableHandlers = {
     if (isObject(res)) {
       return reactive(res)
     }
+
     return res //返回target[key]
   },
   set(target, key, newValue, receiver) {
     const oldValue = target[key]
 
+    // 处理隐式更新数组length情况
+    const targetIsArray = Array.isArray(target)
+    const oldLength = targetIsArray ? target.length : 0
+
     /**
      * 触发更新，set时通知之前收集的依赖，重新执行
      */
     // console.log('set  target key newValue:', target, key, newValue)
-
-    // 先更新set，再通知重新执行
-    const res = Reflect.set(target, key, newValue, receiver)
 
     /**
      * 如果更新了state.a，他之前是一个ref,那么会修改原始的ref.value的值为newValue
@@ -50,12 +52,29 @@ export const mutableHandlers = {
      */
     if (isRef(oldValue) && !isRef(newValue)) {
       oldValue.value = newValue
-      return res
+      return true
     }
+
+    // 先更新set，再通知重新执行
+    const res = Reflect.set(target, key, newValue, receiver)
 
     //如果set新值和老值不一样，触发更新
     if (hasChange(newValue, oldValue)) {
       trigger(target, key)
+    }
+
+    /**
+     * 隐式更新 length
+     * 更新前：length = 4 => ['a', 'b', 'c', 'd']
+     * 更新后：length = 5 => ['a', 'b', 'c', 'd', 'e']
+     * 更新动作，以 push 为例，追加了一个 e
+     * 隐式更新 length 的方法：push pop shift unshift
+     *
+     * 如何知道 隐式更新了 length
+     */
+    const newLength = targetIsArray ? target.length : 0
+    if (targetIsArray && newLength !== oldLength && key !== 'length') {
+      trigger(target, 'length')
     }
 
     return res //返回target[key]=newValue
