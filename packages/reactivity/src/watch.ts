@@ -22,7 +22,8 @@ export function watch(source, cb, options) {
 
   if (deep) {
     const baseGetter = getter
-    getter = () => traverse(baseGetter())
+    const depth = deep === true ? Infinity : deep
+    getter = () => traverse(baseGetter(), depth)
   }
 
   let oldValue
@@ -57,18 +58,29 @@ export function watch(source, cb, options) {
   return stop
 }
 
-function traverse(value, seen = new Set()) {
-  if (!isObject(value)) {
+function traverse(value, depth = Infinity, seen = new Set()) {
+  // 如果不是对象或者深度已经到达，直接返回
+  if (!isObject(value) || depth <= 0) {
     return value
   }
 
+  // 如果之前访问过，收集过依赖，直接返回，解决循环引用问题
   if (seen.has(value)) {
     return value
   }
+
+  // if (depth <= 0) {  // 合并到上方,监听层级到了，直接返回
+  //   return value
+  // }
+
+  // 每收集一层，depth--
+  depth--
+  // 没有收集过，添加到Set()
   seen.add(value)
 
   for (const key in value) {
-    traverse(value[key], seen)
+    // 递归触发getter
+    traverse(value[key], depth, seen)
   }
   return value
 }
