@@ -1,11 +1,28 @@
 import { isRef } from './ref'
 import { ReactiveEffect } from './effect'
+import { isObject } from '@vue/shared'
 
 export function watch(source, cb, options) {
+  const { immediate, once, deep } = options || {}
+
+  if (once) {
+    // 如果once传了，那就保存一份，新的cb等于原来的，加上stop
+    const _cb = cb
+    cb = (...args) => {
+      _cb(...args)
+      stop()
+    }
+  }
+
   let getter
 
   if (isRef(source)) {
     getter = () => source.value
+  }
+
+  if (deep) {
+    const baseGetter = getter
+    getter = () => traverse(baseGetter())
   }
 
   let oldValue
@@ -25,7 +42,12 @@ export function watch(source, cb, options) {
 
   effect.scheduler = job
 
-  oldValue = effect.run()
+  if (immediate) {
+    job()
+  } else {
+    // 拿到oldValue，并收集依赖
+    oldValue = effect.run()
+  }
 
   // 停止监听
   function stop() {
@@ -33,4 +55,20 @@ export function watch(source, cb, options) {
   }
 
   return stop
+}
+
+function traverse(value, seen = new Set()) {
+  if (!isObject(value)) {
+    return value
+  }
+
+  if (seen.has(value)) {
+    return value
+  }
+  seen.add(value)
+
+  for (const key in value) {
+    traverse(value[key], seen)
+  }
+  return value
 }
