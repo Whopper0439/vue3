@@ -88,3 +88,57 @@ export function triggerRef(dep) {
     propagate(dep.subs)
   }
 }
+
+class ObjectRefImpl {
+  [ReactiveFlags.IS_REF] = true
+  constructor(
+    public _object,
+    public _key,
+  ) {}
+
+  get value() {
+    return this._object[this._key]
+  }
+
+  set value(newValue) {
+    this._object[this._key] = newValue
+  }
+}
+
+export function toRef(target, key) {
+  return new ObjectRefImpl(target, key)
+}
+
+export function toRefs(target) {
+  // target一定是一个reactive对象
+  const refs = {}
+  for (const key in target) {
+    refs[key] = new ObjectRefImpl(target, key)
+  }
+  return refs
+}
+
+export function unref(value) {
+  return isRef(value) ? value.value : value
+}
+
+export function proxyRefs(target) {
+  return new Proxy(target, {
+    get(...args) {
+      /**
+       * 自动解包
+       * 如果target[key]是一个ref,那就返回 ref.value ，否则返回target[key]
+       */
+      const res = Reflect.get(...args)
+      return unref(res)
+    },
+    set(target, key, newValue, receiver) {
+      const oldValue = target[key]
+      if (isRef(oldValue) && !isRef(newValue)) {
+        oldValue.value = newValue
+        return true
+      }
+      return Reflect.set(target, key, newValue, receiver)
+    },
+  })
+}

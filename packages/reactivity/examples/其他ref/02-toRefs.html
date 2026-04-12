@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Title</title>
+    <style>
+      body {
+        padding: 150px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module">
+      // import {
+      //   reactive,
+      //   effect,
+      //   ref,
+      //   toRef,
+      //   toRefs,
+      // } from '../../../../node_modules/vue/dist/vue.esm-browser.js'
+      import {
+        reactive,
+        effect,
+        ref,
+        toRef,
+        toRefs,
+      } from '../../dist/reactivity.esm.js'
+
+      /**
+       * 1. toRef
+       * 2. toRefs
+       * 3. unref
+       * 4. proxyRefs
+       */
+
+      const state = reactive({
+        name: '张三',
+        age: 18,
+      })
+
+      const { name, age } = toRefs(state)
+      // console.log('name ==> ', name)
+      effect(() => {
+        // console.log(state.name)
+        console.log(age.value)
+      })
+
+      setTimeout(() => {
+        // name.value = '远方'
+        state.age++
+      }, 1000)
+
+      // const Comp = {
+      //   template: `<div>{{setupState.a.value}}</div>`,
+      //   setup() {
+      //     const state = reactive({
+      //       a: 1,
+      //       b: 2,
+      //     })
+      //     return {
+      //       ...toRefs(state),
+      //       // a: ObjectRefImpl
+      //       // b: ObjectRefImpl
+      //     }
+      //   },
+      // }
+    </script>
+  </body>
+</html>
