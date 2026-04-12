@@ -46,6 +46,7 @@ const require = createRequire(import.meta.url)
 
 const target = positionals.length ? positionals[0] : 'vue' // 源码中数组遍历
 const entry = resolve(__dirname, `../packages/${target}/src/index.ts`)
+console.log('target:', target)
 console.log('entry:', entry)
 
 // 打包成js文件，且根据format格式区分，esm/cjs

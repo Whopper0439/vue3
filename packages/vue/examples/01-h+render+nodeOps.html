@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Title</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module">
+      import {
+        h,
+        render,
+        createRenderer,
+      } from '../../../node_modules/vue/dist/vue.esm-browser.js'
+
+      import { renderOptions } from '../dist/vue.esm.js'
+      /**
+       * vue 通过渲染器，将虚拟节点，转换成真实 DOM ，最终渲染到页面上
+       * vnode => render => 真实 DOM
+       */
+
+      /**
+       * runtime-core 依赖响应式模块 reactivity
+       * runtime-dom 依赖 runtime-core
+       * vue 包 导出了 runtime-dom
+       */
+
+      const renderer = createRenderer(renderOptions)
+
+      const vnode = h('div', 'hello,world')
+
+      // render(vnode, app)
+      renderer.render(vnode, app)
+
+      setTimeout(() => {
+        renderer.render(null, app)
+      }, 1000)
+    </script>
+  </body>
+</html>
