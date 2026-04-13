@@ -1,4 +1,4 @@
-import { isObject, hasChange } from '@vue/shared'
+import { isObject, hasChange } from 'packages/shared/src/utils'
 import { activeSub, effect } from './effect'
 import { Dependency, Link, link, propagate } from './system'
 import { reactive } from './reactive'

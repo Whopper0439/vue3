@@ -1,6 +1,6 @@
 import { isRef } from './ref'
 import { ReactiveEffect } from './effect'
-import { isFunction, isObject } from '@vue/shared'
+import { isFunction, isObject } from 'packages/shared/src/utils'
 import { isReactive } from './reactive'
 
 export function watch(source, cb, options) {

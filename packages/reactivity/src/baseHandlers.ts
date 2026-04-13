@@ -1,6 +1,6 @@
 import { track, trigger } from './dep'
 import { isRef } from './ref'
-import { hasChange, isObject } from '@vue/shared'
+import { hasChange, isObject } from 'packages/shared/src/utils'
 import { reactive } from './reactive'
 
 export const mutableHandlers = {

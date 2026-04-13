@@ -1,4 +1,4 @@
-import { isObject } from '@vue/shared'
+import { isObject } from 'packages/shared/src/utils'
 import { mutableHandlers } from './baseHandlers'
 
 export function reactive(target) {

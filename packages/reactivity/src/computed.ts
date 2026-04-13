@@ -1,4 +1,4 @@
-import { hasChange, isFunction } from '@vue/shared'
+import { hasChange, isFunction } from 'packages/shared/src/utils'
 import { ReactiveFlags } from './ref'
 import { Dependency, endTrack, link, Link, startTrack, Sub } from './system'
 import { activeSub, setActiveSub } from './effect'

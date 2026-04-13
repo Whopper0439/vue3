@@ -1,4 +1,4 @@
-import { isString } from '@vue/shared'
+import { isString } from 'packages/shared/src/utils'
 
 export function patchStyle(el, prevValue, nextValue) {
   const style = el.style
