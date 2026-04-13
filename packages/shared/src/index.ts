@@ -23,3 +23,7 @@ export function isOn(key) {
 export function isString(value) {
   return typeof value === 'string'
 }
+
+export function isArray(value) {
+  return Array.isArray(value)
+}
